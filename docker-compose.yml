@@ -1,0 +1,12 @@
+services:
+  php-container:
+    build:
+      context: .
+      dockerfile: php-container/Dockerfile
+    ports:
+      - "8083:8083"
+    env_file:
+      - .env
+    restart: always
+    command: php -S 0.0.0.0:8083 -t /app router.php
+
