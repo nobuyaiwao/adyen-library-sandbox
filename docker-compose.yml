@@ -1,12 +1,36 @@
+version: "3.8"
+
 services:
   php-container:
     build:
-      context: .
-      dockerfile: php-container/Dockerfile
+      context: ./php-container 
+      dockerfile: Dockerfile
     ports:
       - "8083:8083"
     env_file:
-      - .env
+      - .env  
     restart: always
     command: php -S 0.0.0.0:8083 -t /app router.php
+
+#  java-container:
+#    build:
+#      context: ./java-container 
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8084:8084"
+#    env_file:
+#      - .env
+#    restart: always
+#    command: java -jar app.jar
+#
+#  go-container:
+#    build:
+#      context: ./go-container 
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8085:8085"
+#    env_file:
+#      - .env
+#    restart: always
+#    command: ./app
 
