@@ -3,13 +3,15 @@ version: "3.8"
 services:
   php-container:
     build:
-      context: ./php-container 
+      context: ./php-container
       dockerfile: Dockerfile
     ports:
       - "8083:8083"
     env_file:
-      - .env  
+      - .env
     restart: always
+    volumes:
+      - ./php-container:/app 
     command: php -S 0.0.0.0:8083 -t /app router.php
 
 #  java-container:
