@@ -3,7 +3,28 @@ import axios from "axios";
 import "./App.css"; // Make sure to include styling for error highlighting
 
 const apiClasses = {
-  Checkout: ["/payments", "/payments/details"],
+  Checkout: [
+    "/payments",
+    "/payments/details",
+    "/payments/sessions",
+    "/payments/{paymentPspReference}/cancel",
+    "/payments/{paymentPspReference}/capture",
+    "/payments/{paymentPspReference}/refund",
+    "/payments/{paymentPspReference}/reversal",
+    "/payments/{paymentPspReference}/amountUpdates",
+    "/paymentMethods",
+    "/paymentMethods/balance",
+    "/paymentMethods/{paymentMethod}/issuers",
+    "/orders",
+    "/orders/cancel",
+    "/originKeys",
+    "/clientKeys",
+    "/storedPaymentMethods",
+    "/storedPaymentMethods/{recurringDetailReference}",
+    "/storedPaymentMethods/{recurringDetailReference}/disable",
+    "/terminalApi/sync",
+    "/terminalApi/async"
+  ],
   Recurring: ["/listRecurringDetails", "/disable"],
   Management: ["/me", "/merchantAccounts"]
 };
@@ -66,7 +87,9 @@ export default function App() {
           value={selectedClass}
           onChange={(e) => {
             setSelectedClass(e.target.value);
-            setSelectedMethod(apiClasses[e.target.value][0]); // Reset method selection
+            //setSelectedMethod(apiClasses[e.target.value][0]); // Reset method selection
+            const firstMethod = apiClasses[e.target.value][0] || "";
+            setSelectedMethod(firstMethod); // Reset method selection dynamically
           }}
         >
           {Object.keys(apiClasses).map((apiClass) => (
