@@ -1,22 +1,50 @@
+/* Layout setup for left and right panels */
 .app-container {
   display: flex;
-  width: 100vw;
   height: 100vh;
+  width: 100%;
 }
 
-.left-pane {
-  flex: 4;
-  padding: 20px;
-  border-right: 2px solid #ddd;
-  background-color: #f4f4f4;
-  overflow-y: auto;
-}
-
-.right-pane {
-  flex: 6;
+.left-panel {
+  width: 40%;
   padding: 20px;
   background-color: #f9f9f9;
-  border-left: 2px solid #ddd;
+  border-right: 2px solid #ddd;
+}
+
+.right-panel {
+  width: 60%;
+  padding: 20px;
   overflow-y: auto;
+}
+
+textarea {
+  width: 95%;
+  font-family: monospace;
+  min-height: 200px;
+  resize: vertical;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+textarea.json-error {
+  border: 2px solid red;
+  background-color: #ffe6e6;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.response-box {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: auto;
 }
 
