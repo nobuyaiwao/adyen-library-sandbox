@@ -1,7 +1,5 @@
-// Add this import at the top
-import React from "react";
-
-import { useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 const apiClasses = {
   Checkout: ["/payments", "/payments/details"],
@@ -15,6 +13,26 @@ export default function App() {
   const [requestBody, setRequestBody] = useState(
     JSON.stringify({ amount: { currency: "EUR", value: 1000 } }, null, 2)
   );
+  const [response, setResponse] = useState(null);
+
+  // Handle request body input change
+  const handleRequestBodyChange = (event) => {
+    setRequestBody(event.target.value);
+  };
+
+  // Function to send API request
+  const sendRequest = async () => {
+    try {
+      const requestData = JSON.parse(requestBody);
+      const res = await axios.post("http://localhost:8083/run-test", {
+        api: selectedMethod,
+        params: requestData
+      });
+      setResponse(res.data);
+    } catch (error) {
+      setResponse({ error: error.message });
+    }
+  };
 
   return (
     <div className="container">
@@ -39,9 +57,33 @@ export default function App() {
         ))}
       </select>
 
-      {/* Display Request JSON */}
+      {/* Request JSON Editor */}
       <h3>Request Body</h3>
-      <pre>{requestBody}</pre>
+      <textarea
+        value={requestBody}
+        onChange={handleRequestBodyChange}
+        rows="6"
+        style={{ width: "100%", fontFamily: "monospace" }}
+      />
+
+      {/* Send Request Button */}
+      <button onClick={sendRequest} style={{ marginTop: "10px" }}>
+        Send Request
+      </button>
+
+      {/* Response Display */}
+      <h3>Response</h3>
+      <pre
+        style={{
+          backgroundColor: "#f4f4f4",
+          padding: "10px",
+          borderRadius: "5px",
+          whiteSpace: "pre-wrap",
+          wordWrap: "break-word",
+        }}
+      >
+        {response ? JSON.stringify(response, null, 2) : "No response yet"}
+      </pre>
     </div>
   );
 }
