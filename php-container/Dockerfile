@@ -1,24 +1,23 @@
+# Use PHP 8.1 CLI as base image
 FROM php:8.1-cli
 
+# Set working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y unzip
+# Install required PHP extensions
+RUN apt-get update && apt-get install -y unzip curl
 
-# 🔹 `composer.json` を先にコピーしてキャッシュを活用
-COPY composer.json /app/
-COPY composer.lock /app/
-
-# 🔹 Composer をインストール
+# Install Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     rm composer-setup.php
 
-# 🔹 `composer install` を確実に実行
-RUN composer install --no-dev --prefer-dist --no-interaction || exit 1
+# Copy application files
+COPY . /app
 
-# 🔹 アプリケーションファイルをコピー
-COPY server.php /app/
-COPY router.php /app/
+# Expose port 8083
+EXPOSE 8083
 
-CMD ["php", "-S", "0.0.0.0:8083", "-t", "/app", "router.php"]
+# Start PHP built-in server
+CMD ["php", "-S", "0.0.0.0:8083"]
 

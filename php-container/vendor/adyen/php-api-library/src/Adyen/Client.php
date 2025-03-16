@@ -4,13 +4,10 @@ namespace Adyen;
 
 use Adyen\HttpClient\ClientInterface;
 use Adyen\HttpClient\CurlClient;
-use Psr\Log\LoggerInterface;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 
 class Client
 {
-    const LIB_VERSION = "11.0.0";
+    const LIB_VERSION = "27.0.0";
     const LIB_NAME = "adyen-php-api-library";
     const USER_AGENT_SUFFIX = "adyen-php-api-library/";
     const ENDPOINT_TEST = "https://pal-test.adyen.com";
@@ -22,16 +19,19 @@ class Client
     const API_BIN_LOOKUP_VERSION = "v50";
     const API_PAYOUT_VERSION = "v51";
     const API_RECURRING_VERSION = "v49";
-    const API_CHECKOUT_VERSION = "v68";
+    const API_CHECKOUT_VERSION = "v71";
     const API_CHECKOUT_UTILITY_VERSION = "v1";
-    const API_NOTIFICATION_VERSION = "v5";
-    const API_ACCOUNT_VERSION = "v5";
-    const API_FUND_VERSION = "v5";
+    const API_NOTIFICATION_VERSION = "v6";
+    const API_ACCOUNT_VERSION = "v6";
+    const API_FUND_VERSION = "v6";
     const API_DISPUTE_SERVICE_VERSION = "v30";
-    const API_HOP_VERSION = "v5";
+    const API_HOP_VERSION = "v6";
     const ENDPOINT_TERMINAL_CLOUD_TEST = "https://terminal-api-test.adyen.com";
     const ENDPOINT_TERMINAL_CLOUD_LIVE = "https://terminal-api-live.adyen.com";
-    const ENDPOINT_CHECKOUT_TEST = "https://checkout-test.adyen.com/checkout";
+    const ENDPOINT_TERMINAL_CLOUD_US_LIVE = "https://terminal-api-live-us.adyen.com";
+    const ENDPOINT_TERMINAL_CLOUD_AU_LIVE = "https://terminal-api-live-au.adyen.com";
+    const ENDPOINT_TERMINAL_CLOUD_APSE_LIVE = "https://terminal-api-live-apse.adyen.com";
+    const ENDPOINT_CHECKOUT_TEST = "https://checkout-test.adyen.com";
     const ENDPOINT_CHECKOUT_LIVE_SUFFIX = "-checkout-live.adyenpayments.com/checkout";
     const ENDPOINT_PROTOCOL = "https://";
     const ENDPOINT_NOTIFICATION_TEST = "https://cal-test.adyen.com/cal/services/Notification";
@@ -46,9 +46,12 @@ class Client
     const ENDPOINT_CUSTOMER_AREA_LIVE = "https://ca-live.adyen.com";
     const ENDPOINT_HOP_TEST = "https://cal-test.adyen.com/cal/services/Hop";
     const ENDPOINT_HOP_LIVE = "https://cal-live.adyen.com/cal/services/Hop";
+    const MANAGEMENT_API_TEST = "https://management-test.adyen.com";
+    const MANAGEMENT_API_LIVE = "https://management-live.adyen.com";
+    const MANAGEMENT_API = "v1";
 
     /**
-     * @var Config|ConfigInterface
+     * @var Config
      */
     private $config;
 
@@ -57,38 +60,12 @@ class Client
      */
     private $httpClient;
 
-    /**
-     * @var LoggerInterface|null
-     */
-    private $logger;
-
-    /**
-     * Client constructor.
-     *
-     * @param ConfigInterface|null $config
-     * @throws AdyenException
-     */
-    public function __construct($config = null)
+    public function __construct(?Config $config = null)
     {
-        if ($config === null) {
-            // Create config
-            $config = new Config();
-        }
-
-        if (! $config instanceof ConfigInterface) {
-            throw new \Adyen\AdyenException(
-                'This config object is not supported,' .
-                ' you need to implement the ConfigInterface'
-            );
-        }
-
-        $this->config = $config;
+        $this->config = $config ?? new Config();
     }
 
-    /**
-     * @return Config|ConfigInterface
-     */
-    public function getConfig()
+    public function getConfig(): ?Config
     {
         return $this->config;
     }
@@ -128,9 +105,19 @@ class Client
      *
      * @param string $proxy
      */
-    public function setHttpProxy($proxy)
+    public function setHttpProxy(string $proxy)
     {
         $this->config->set('http-proxy', $proxy);
+    }
+
+    /**
+     * Set the path to a CA bundle file that enables verification using a custom certificate
+     *
+     * @param string $certFilePath
+     */
+    public function setSslVerify(string $certFilePath)
+    {
+        $this->config->set('ssl-verify', $certFilePath);
     }
 
     /**
@@ -142,12 +129,11 @@ class Client
      *                                           menu in the Adyen Customer Area
      * @throws AdyenException
      */
-    public function setEnvironment($environment, $liveEndpointUrlPrefix = null)
+    public function setEnvironment(string $environment, ?string $liveEndpointUrlPrefix = null)
     {
-        if ($environment == \Adyen\Environment::TEST) {
-            $this->config->set('environment', \Adyen\Environment::TEST);
+        if ($environment == Environment::TEST) {
+            $this->config->set('environment', Environment::TEST);
             $this->config->set('endpoint', self::ENDPOINT_TEST);
-            $this->config->set('endpointDirectorylookup', self::ENDPOINT_TEST_DIRECTORY_LOOKUP);
             $this->config->set('endpointTerminalCloud', self::ENDPOINT_TERMINAL_CLOUD_TEST);
             $this->config->set('endpointCheckout', self::ENDPOINT_CHECKOUT_TEST);
             $this->config->set('endpointNotification', self::ENDPOINT_NOTIFICATION_TEST);
@@ -156,9 +142,9 @@ class Client
             $this->config->set('endpointDisputeService', self::ENDPOINT_DISPUTE_SERVICE_TEST);
             $this->config->set('endpointCustomerArea', self::ENDPOINT_CUSTOMER_AREA_TEST);
             $this->config->set('endpointHop', self::ENDPOINT_HOP_TEST);
-        } elseif ($environment == \Adyen\Environment::LIVE) {
-            $this->config->set('environment', \Adyen\Environment::LIVE);
-            $this->config->set('endpointDirectorylookup', self::ENDPOINT_LIVE_DIRECTORY_LOOKUP);
+            $this->config->set('endpointManagementApi', self::MANAGEMENT_API_TEST);
+        } elseif ($environment == Environment::LIVE) {
+            $this->config->set('environment', Environment::LIVE);
             $this->config->set('endpointTerminalCloud', self::ENDPOINT_TERMINAL_CLOUD_LIVE);
             $this->config->set('endpointNotification', self::ENDPOINT_NOTIFICATION_LIVE);
             $this->config->set('endpointAccount', self::ENDPOINT_ACCOUNT_LIVE);
@@ -166,8 +152,10 @@ class Client
             $this->config->set('endpointDisputeService', self::ENDPOINT_DISPUTE_SERVICE_LIVE);
             $this->config->set('endpointCustomerArea', self::ENDPOINT_CUSTOMER_AREA_LIVE);
             $this->config->set('endpointHop', self::ENDPOINT_HOP_LIVE);
+            $this->config->set('endpointManagementApi', self::MANAGEMENT_API_LIVE);
 
             if ($liveEndpointUrlPrefix) {
+                $this->config->set('prefix', $liveEndpointUrlPrefix);
                 $this->config->set(
                     'endpoint',
                     self::ENDPOINT_PROTOCOL . $liveEndpointUrlPrefix . self::ENDPOINT_LIVE_SUFFIX
@@ -182,10 +170,42 @@ class Client
             }
         } else {
             // environment does not exist
-            $msg = "This environment does not exist, use " .
-                \Adyen\Environment::TEST . ' or ' . \Adyen\Environment::LIVE;
-            throw new \Adyen\AdyenException($msg);
+            $msg = "This environment does not exist, use " . Environment::TEST . ' or ' . Environment::LIVE;
+            throw new AdyenException($msg);
         }
+
+        // Retrieve and set the Terminal API Cloud Endpoint
+        $endpoint = $this->retrieveCloudEndpoint($this->config->get('terminalApiRegion'), $environment);
+        $this->config->set('terminalApiCloudEndpoint', $endpoint);
+    }
+
+    /**
+     * Retrieve the cloud endpoint for a given region and environment.
+     *
+     * @param string|null $region The region for which the endpoint is requested. Defaults to the EU endpoint if null or unsupported.
+     * @param string $environment The environment, either 'test' or 'live'.
+     * @return string The endpoint URL.
+     * @throws AdyenException
+     */
+    public function retrieveCloudEndpoint(?string $region, string $environment): string
+    {
+        // Check if the environment is TEST
+        if ($environment === Environment::TEST) {
+            return self::ENDPOINT_TERMINAL_CLOUD_TEST;
+        }
+
+        // Check if the environment is LIVE
+        if ($environment === Environment::LIVE) {
+            if ($environment === Environment::LIVE) {
+                $region = $region ?? Region::EU;
+                if (!array_key_exists($region, Region::TERMINAL_API_ENDPOINTS_MAPPING)) {
+                    throw new AdyenException("TerminalAPI endpoint for $region is not supported yet");
+                }
+                return Region::TERMINAL_API_ENDPOINTS_MAPPING[$region];
+            }
+        }
+        // Default to TEST endpoint if no valid environment is specified
+        return self::ENDPOINT_TERMINAL_CLOUD_TEST;
     }
 
     /**
@@ -196,16 +216,6 @@ class Client
     public function setRequestUrl($url)
     {
         $this->config->set('endpoint', $url);
-    }
-
-    /**
-     * Set directory lookup URL
-     *
-     * @param $url
-     */
-    public function setDirectoryLookupUrl($url)
-    {
-        $this->config->set('endpointDirectorylookup', $url);
     }
 
     /**
@@ -231,7 +241,7 @@ class Client
      * @param string $version
      * @param string $integrator
      */
-    public function setExternalPlatform($name, $version, $integrator = "")
+    public function setExternalPlatform(string $name, string $version, string $integrator = "")
     {
         $this->config->set(
             'externalPlatform',
@@ -245,9 +255,9 @@ class Client
      * @param string $name
      * @param string $version
      */
-    public function setAdyenPaymentSource($name, $version)
+    public function setAdyenPaymentSource(string $name, string $version)
     {
-        $this->config->set('adyenPaymentSource', array('name' => $name, 'version' => $version));
+        $this->config->set('adyenPaymentSource', ['name' => $name, 'version' => $version]);
     }
 
     /**
@@ -256,9 +266,9 @@ class Client
      * @param string $name
      * @param string $version
      */
-    public function setMerchantApplication($name, $version)
+    public function setMerchantApplication(string $name, string $version)
     {
-        $this->config->set('merchantApplication', array('name' => $name, 'version' => $version));
+        $this->config->set('merchantApplication', ['name' => $name, 'version' => $version]);
     }
 
     /**
@@ -293,8 +303,9 @@ class Client
      * Get the library name
      *
      * @return string
+     * @deprecated
      */
-    public function getLibraryName()
+    public function getLibraryName(): string
     {
         return self::LIB_NAME;
     }
@@ -303,8 +314,9 @@ class Client
      * Get the library version
      *
      * @return string
+     * @deprecated
      */
-    public function getLibraryVersion()
+    public function getLibraryVersion(): string
     {
         return self::LIB_VERSION;
     }
@@ -313,8 +325,9 @@ class Client
      * Get the version of the API Payment endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiPaymentVersion()
+    public function getApiPaymentVersion(): string
     {
         return self::API_PAYMENT_VERSION;
     }
@@ -323,8 +336,9 @@ class Client
      * Get the version of the API BinLookUp endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiBinLookupVersion()
+    public function getApiBinLookupVersion(): string
     {
         return self::API_BIN_LOOKUP_VERSION;
     }
@@ -333,8 +347,9 @@ class Client
      * Get the version of the API Payout endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiPayoutVersion()
+    public function getApiPayoutVersion(): string
     {
         return self::API_PAYOUT_VERSION;
     }
@@ -343,8 +358,9 @@ class Client
      * Get the version of the Recurring API endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiRecurringVersion()
+    public function getApiRecurringVersion(): string
     {
         return self::API_RECURRING_VERSION;
     }
@@ -353,8 +369,9 @@ class Client
      * Get the version of the Checkout API endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiCheckoutVersion()
+    public function getApiCheckoutVersion(): string
     {
         return self::API_CHECKOUT_VERSION;
     }
@@ -363,8 +380,9 @@ class Client
      * Get the version of the Checkout Utility API endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiCheckoutUtilityVersion()
+    public function getApiCheckoutUtilityVersion(): string
     {
         return self::API_CHECKOUT_UTILITY_VERSION;
     }
@@ -373,8 +391,9 @@ class Client
      * Get the version of the Notification API endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiNotificationVersion()
+    public function getApiNotificationVersion(): string
     {
         return self::API_NOTIFICATION_VERSION;
     }
@@ -383,8 +402,9 @@ class Client
      * Get the version of the Account API endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiAccountVersion()
+    public function getApiAccountVersion(): string
     {
         return self::API_ACCOUNT_VERSION;
     }
@@ -393,8 +413,9 @@ class Client
      * Get the version of the HOP (Hosted Onboarding Page) API endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiHopVersion()
+    public function getApiHopVersion(): string
     {
         return self::API_HOP_VERSION;
     }
@@ -403,8 +424,9 @@ class Client
      * Get the version of the Fund API endpoint
      *
      * @return string
+     * @deprecated
      */
-    public function getApiFundVersion()
+    public function getApiFundVersion(): string
     {
         return self::API_FUND_VERSION;
     }
@@ -413,10 +435,22 @@ class Client
      * Get the disputes service API version
      *
      * @return string
+     * @deprecated
      */
-    public function getDisputeServiceVersion()
+    public function getDisputeServiceVersion(): string
     {
         return self::API_DISPUTE_SERVICE_VERSION;
+    }
+
+    /**
+     * Get the version of the management API endpoint
+     *
+     * @return string
+     * @deprecated
+     */
+    public function getManagementApiVersion(): string
+    {
+        return self::MANAGEMENT_API;
     }
 
     /**
@@ -441,41 +475,8 @@ class Client
     /**
      * @return CurlClient
      */
-    protected function createDefaultHttpClient()
+    protected function createDefaultHttpClient(): CurlClient
     {
         return new CurlClient();
-    }
-
-    /**
-     * Set the Logger object
-     *
-     * @param LoggerInterface $logger
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        if ($this->logger === null) {
-            $this->logger = $this->createDefaultLogger();
-        }
-
-        return $this->logger;
-    }
-
-    /**
-     * @return Logger
-     */
-    protected function createDefaultLogger()
-    {
-        $logger = new Logger('adyen-php-api-library');
-        $logger->pushHandler(new StreamHandler('php://stderr', Logger::NOTICE));
-
-        return $logger;
     }
 }

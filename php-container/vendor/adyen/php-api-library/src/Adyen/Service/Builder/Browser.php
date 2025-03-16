@@ -23,6 +23,9 @@
 
 namespace Adyen\Service\Builder;
 
+/**
+ * @deprecated
+ */
 class Browser
 {
     const BROWSER_INFO = 'browserInfo';
@@ -33,7 +36,7 @@ class Browser
      * @param int $screenWidth
      * @param int $screenHeight
      * @param int $colorDepth
-     * @param int $timeZoneOffsetß
+     * @param int $timeZoneOffset
      * @param string $language
      * @param bool $javaEnabled
      * @param array $request

@@ -13,15 +13,14 @@
     "ext-curl": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
-    "ext-openssl": "*",
-    "monolog/monolog": "^1.16 || ^2.0"
+    "ext-openssl": "*"
   },
   "require-dev": {
-    "dms/phpunit-arraysubset-asserts": "0.3.0",
+    "dms/phpunit-arraysubset-asserts": "0.5.0",
     "friendsofphp/php-cs-fixer": "*",
-    "phpunit/phpunit": "9.5.10",
-    "php-coveralls/php-coveralls": "2.4.3",
-    "squizlabs/php_codesniffer": "3.6.1"
+    "phpunit/phpunit": "9.6.19",
+    "php-coveralls/php-coveralls": "2.7.0",
+    "squizlabs/php_codesniffer": "3.10.2"
   },
   "autoload": {
     "psr-4": {
@@ -32,5 +31,8 @@
     "psr-4": {
       "Adyen\\Tests\\": "tests/"
     }
+  },
+  "scripts": {
+    "fmt": "phpcbf src/Adyen/Service/** src/Adyen/Model/**"
   }
 }

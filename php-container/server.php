@@ -7,7 +7,7 @@ use Adyen\Service\Checkout;
 
 header("Content-Type: application/json");
 
-// `/run-test` のみを処理するようにチェック
+// Handle `/run-test` requests only
 $requestUri = $_SERVER["REQUEST_URI"];
 if ($requestUri !== "/run-test") {
     http_response_code(404);
@@ -15,29 +15,29 @@ if ($requestUri !== "/run-test") {
     exit;
 }
 
-// 環境変数から API キーと Merchant Account を取得
+// Load API key and Merchant Account from environment variables
 $apiKey = getenv("ADYEN_API_KEY");
-$merchantAccount = getenv("MERCHANT_ACCOUNT");
+$merchantAccount = getenv("ADYEN_MERCHANT_ACCOUNT");
 
 if (!$apiKey || !$merchantAccount) {
     echo json_encode(["error" => "Missing API key or Merchant Account"]);
     exit;
 }
 
-// Adyen クライアントを作成
+// Create Adyen Client
 $client = new Client();
 $client->setEnvironment(Environment::TEST);
 $client->setXApiKey($apiKey);
 $checkout = new Checkout($client);
 
-// リクエストデータを取得
+// Get request data
 $request = json_decode(file_get_contents("php://input"), true);
 if (!$request || !isset($request["api"]) || !isset($request["params"])) {
     echo json_encode(["error" => "Invalid request"]);
     exit;
 }
 
-// `merchantAccount` をリクエストに追加
+// Add `merchantAccount` to request params
 $request["params"]["merchantAccount"] = $merchantAccount;
 
 try {

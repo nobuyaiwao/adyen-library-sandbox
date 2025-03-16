@@ -2,6 +2,11 @@
 
 namespace Adyen\Service;
 
+/**
+ * @deprecated Please consider using the BalancePlatform and LegalEntityManagement services instead
+ * @see \Adyen\Service\BalancePlatform\
+ * @see \Adyen\Service\LegalEntityManagement\
+ */
 class Account extends \Adyen\Service
 {
     /**
@@ -80,7 +85,13 @@ class Account extends \Adyen\Service
     protected $unSuspendAccountHolder;
 
     /**
+     * @var ResourceModel\Account\DeleteSignatories
+     */
+    protected $deleteSignatories;
+
+    /**
      * Account constructor.
+     *
      * @param \Adyen\Client $client
      * @throws \Adyen\AdyenException
      */
@@ -103,6 +114,7 @@ class Account extends \Adyen\Service
         $this->closeAccountHolder = new \Adyen\Service\ResourceModel\Account\CloseAccountHolder($this);
         $this->suspendAccountHolder = new \Adyen\Service\ResourceModel\Account\SuspendAccountHolder($this);
         $this->unSuspendAccountHolder = new \Adyen\Service\ResourceModel\Account\UnSuspendAccountHolder($this);
+        $this->deleteSignatories = new \Adyen\Service\ResourceModel\Account\DeleteSignatories($this);
     }
 
     /**
@@ -253,5 +265,15 @@ class Account extends \Adyen\Service
     public function unSuspendAccountHolder($params)
     {
         return $this->unSuspendAccountHolder->request($params);
+    }
+
+    /**
+     * @param $params
+     * @return mixed
+     * @throws \Adyen\AdyenException
+     */
+    public function deleteSignatories($params)
+    {
+        return $this->deleteSignatories->request($params);
     }
 }

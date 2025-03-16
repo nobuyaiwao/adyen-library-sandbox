@@ -1,36 +1,52 @@
 version: "3.8"
 
-services:
-  php-container:
-    build:
-      context: ./php-container
-      dockerfile: Dockerfile
-    ports:
-      - "8083:8083"
-    env_file:
-      - .env
-    restart: always
-    volumes:
-      - ./php-container:/app
-    command: php -S 0.0.0.0:8083 -t /app router.php
+#  php-container:
+#    build:
+#      context: ./php-container
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8083:8083"
+#    volumes:
+#      - ./php-container:/app
+##   command: php -S 0.0.0.0:8083 -t /app
+#    command: php -S 0.0.0.0:8083 router.php
 
-  frontend:
-    image: node:18
-    working_dir: /app
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"  
+services:
+    php-container:
+      build:
+        context: ./php-container
+        dockerfile: Dockerfile
+      ports:
+        - "8083:8083"
+      env_file:
+        - .env
+      restart: always
+      volumes:
+        - ./php-container:/app
+      command: php -S 0.0.0.0:8083 -t /app router.php
+
+#services:
+#  php-container:
+#    build:
+#      context: ./php-container
+#      dockerfile: Dockerfile
+#    ports:
+#      - "0.0.0.0:8083:8083"
+#    env_file:
+#      - .env
+#    restart: always
+#    volumes:
+#      - ./php-container:/app
+#    command: php -S 0.0.0.0:8083 -t /app router.php
 
 #  frontend:
-#    image: node:18 
+#    image: node:18
 #    working_dir: /app
 #    ports:
-#      - "0.0.0.0:3000:3000"
+#      - "3000:3000"
 #    volumes:
 #      - ./frontend:/app
-#    command: sh -c "npm install && npm run dev"
+#    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"  
 
 #  java-container:
 #    build:

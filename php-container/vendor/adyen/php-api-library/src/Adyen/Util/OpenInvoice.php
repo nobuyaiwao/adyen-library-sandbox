@@ -23,6 +23,9 @@
 
 namespace Adyen\Util;
 
+/**
+ * @deprecated
+ */
 class OpenInvoice
 {
     const AFTERPAY_PAYMENT_METHOD = 'afterpay';
@@ -143,10 +146,7 @@ class OpenInvoice
      */
     public function isOpenInvoicePaymentMethod($paymentMethod)
     {
-        if (in_array(strtolower($paymentMethod), self::$openInvoicePaymentMethods)) {
-            return true;
-        }
-        return false;
+        return in_array(strtolower($paymentMethod), self::$openInvoicePaymentMethods);
     }
 
     /**
@@ -157,9 +157,6 @@ class OpenInvoice
      */
     public function isAfterPayTouchPaymentMethod($paymentMethod)
     {
-        if (in_array($paymentMethod, self::$afterPayTouchPaymentMethods)) {
-            return true;
-        }
-        return false;
+        return in_array($paymentMethod, self::$afterPayTouchPaymentMethods);
     }
 }
