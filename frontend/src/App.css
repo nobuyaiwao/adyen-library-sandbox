@@ -1,0 +1,22 @@
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+.left-pane {
+  flex: 4;
+  padding: 20px;
+  border-right: 2px solid #ddd;
+  background-color: #f4f4f4;
+  overflow-y: auto;
+}
+
+.right-pane {
+  flex: 6;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-left: 2px solid #ddd;
+  overflow-y: auto;
+}
+
