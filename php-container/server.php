@@ -6,6 +6,15 @@ use Adyen\Environment;
 use Adyen\Service\Checkout;
 
 header("Content-Type: application/json");
+// Enable CORS
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+// Handle CORS preflight requests
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    exit(0);
+}
 
 // Handle `/run-test` requests only
 $requestUri = $_SERVER["REQUEST_URI"];
