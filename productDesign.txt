@@ -1,0 +1,19 @@
+# Frontend の流れを検討する
+
+- クラスを選ぶ
+Checkout, Cloud-based Terminal API, Recurring, Management などの API クラスを選択。
+選択すると、そのクラスに含まれるメソッド（エンドポイント）がロードされる。
+
+- メソッドを選ぶ
+
+payments, paymentsDetails, sessions, authorize3D など、選択したクラスに応じたメソッドを選択。
+Cloud-based Terminal API を選択した場合は initiatePayment, confirmPayment などの選択肢が表示される。
+
+- リクエストボディを編集
+JSON エディタを使って amount, reference, paymentMethod などのリクエストボディを手動編集。
+事前にサンプルリクエストを自動生成 するのもアリ（例えば、Checkout の /payments を選ぶとデフォルトの payments JSON を表示）。
+
+- 送信
+編集したリクエストを /run-test に送信。
+結果を表示（成功なら pspReference を取得、エラーなら詳細を表示）。
+
