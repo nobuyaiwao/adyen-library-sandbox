@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./App.css"; // Make sure to include styling for error highlighting
+import requestTemplates from "./requestTemplates.json"; // Import the request templates
 
 const apiClasses = {
   Checkout: [
@@ -33,7 +34,8 @@ export default function App() {
   const [selectedClass, setSelectedClass] = useState("Checkout");
   const [selectedMethod, setSelectedMethod] = useState("/payments");
   const [requestBody, setRequestBody] = useState(
-    JSON.stringify({ amount: { currency: "EUR", value: 1000 } }, null, 2)
+    //JSON.stringify({ amount: { currency: "EUR", value: 1000 } }, null, 2)
+    JSON.stringify(requestTemplates["/payments"], null, 2) // Initialize with the first method's template
   );
   const [response, setResponse] = useState(null);
   const [isJsonError, setIsJsonError] = useState(false);
@@ -50,6 +52,13 @@ export default function App() {
       setIsJsonError(true);
     }
   };
+
+  // Handle API method change and update request body template
+  const handleMethodChange = (method) => {
+    setSelectedMethod(method);
+    setRequestBody(JSON.stringify(requestTemplates[method] || {}, null, 2)); // Set the request body template
+  };
+
 
   // Beautify JSON input
   const beautifyJson = () => {
@@ -89,7 +98,8 @@ export default function App() {
             setSelectedClass(e.target.value);
             //setSelectedMethod(apiClasses[e.target.value][0]); // Reset method selection
             const firstMethod = apiClasses[e.target.value][0] || "";
-            setSelectedMethod(firstMethod); // Reset method selection dynamically
+            //setSelectedMethod(firstMethod); // Reset method selection dynamically
+            handleMethodChange(firstMethod); // Update request body too
           }}
         >
           {Object.keys(apiClasses).map((apiClass) => (
@@ -99,7 +109,7 @@ export default function App() {
 
         {/* API Method Selector */}
         <label>API Method:</label>
-        <select value={selectedMethod} onChange={(e) => setSelectedMethod(e.target.value)}>
+        <select value={selectedMethod} onChange={(e) => handleMethodChange(e.target.value)}>
           {apiClasses[selectedClass].map((method) => (
             <option key={method} value={method}>{method}</option>
           ))}

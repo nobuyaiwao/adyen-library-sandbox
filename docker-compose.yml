@@ -1,16 +1,5 @@
 version: "3.8"
 
-#  php-container:
-#    build:
-#      context: ./php-container
-#      dockerfile: Dockerfile
-#    ports:
-#      - "8083:8083"
-#    volumes:
-#      - ./php-container:/app
-##   command: php -S 0.0.0.0:8083 -t /app
-#    command: php -S 0.0.0.0:8083 router.php
-
 services:
   php-container:
     build:

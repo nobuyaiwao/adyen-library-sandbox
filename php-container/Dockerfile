@@ -19,5 +19,7 @@ COPY . /app
 EXPOSE 8083
 
 # Start PHP built-in server
-CMD ["php", "-S", "0.0.0.0:8083"]
+#CMD ["php", "-S", "0.0.0.0:8083"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8083} -t /app router.php"]
+
 
