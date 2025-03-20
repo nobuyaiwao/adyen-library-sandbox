@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import axios from "axios";
 import "./App.css"; // Make sure to include styling for error highlighting
 import requestTemplates from "./requestTemplates.json"; // Import the request templates
@@ -52,6 +52,28 @@ export default function App() {
       setIsJsonError(true);
     }
   };
+
+  // Replace placeholders in JSON
+  const getFormattedRequestBody = (template) => {
+    if (selectedMethod.includes("{paymentPspReference}")) {
+      const paymentPspReference = prompt("Enter Payment PSP Reference:");
+      if (paymentPspReference) {
+        return JSON.stringify(
+          JSON.parse(template.replace("{paymentPspReference}", paymentPspReference)),
+          null,
+          2
+        );
+      }
+    }
+    return template;
+  };
+  
+  // When API Method changes, load the corresponding template
+  useEffect(() => {
+    if (requestTemplates[selectedMethod]) {
+      setRequestBody(getFormattedRequestBody(JSON.stringify(requestTemplates[selectedMethod], null, 2)));
+    }
+  }, [selectedMethod]);
 
   // Handle API method change and update request body template
   const handleMethodChange = (method) => {

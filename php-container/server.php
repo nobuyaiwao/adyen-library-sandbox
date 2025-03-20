@@ -54,14 +54,40 @@ try {
         $response = $checkout->payments($request["params"]);
     } elseif ($request["api"] === "/payments/details") {
         $response = $checkout->paymentsDetails($request["params"]);
+    } elseif (preg_match("#^/payments/([^/]+)/cancel$#", $request["api"], $matches)) {
+        // Extract the paymentPspReference from the URL
+        $paymentPspReference = $matches[1];
+
+        // Construct request parameters
+        $request["params"]["merchantAccount"] = $merchantAccount;
+        $request["params"]["paymentPspReference"] = $paymentPspReference;
+
+        // Call Adyen API for payment cancellation
+        $response = $checkout->paymentsCancels($request["params"]);
     } else {
         http_response_code(400);
         echo json_encode(["error" => "Unsupported API endpoint"]);
         exit;
     }
-    
+
     echo json_encode($response);
 } catch (\Exception $e) {
     echo json_encode(["error" => $e->getMessage()]);
 }
+
+//try {
+//    if ($request["api"] === "/payments") {
+//        $response = $checkout->payments($request["params"]);
+//    } elseif ($request["api"] === "/payments/details") {
+//        $response = $checkout->paymentsDetails($request["params"]);
+//    } else {
+//        http_response_code(400);
+//        echo json_encode(["error" => "Unsupported API endpoint"]);
+//        exit;
+//    }
+//    
+//    echo json_encode($response);
+//} catch (\Exception $e) {
+//    echo json_encode(["error" => $e->getMessage()]);
+//}
 
