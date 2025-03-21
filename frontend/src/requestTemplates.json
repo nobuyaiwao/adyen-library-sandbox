@@ -1,4 +1,7 @@
 {
+  "/paymentMethods": {
+    "amount": { "currency": "EUR", "value": 1000 }
+  },
   "/payments": {
     "amount": { "currency": "EUR", "value": 1000 },
     "reference": "Adyen API Library Sandbox Test",
@@ -7,7 +10,8 @@
       "number": "4111111111111111",
       "expiryMonth": "03",
       "expiryYear": "2030",
-      "holderName": "John Doe"
+      "cvc": "737",
+      "holderName": "Adyen Taro"
     },
     "returnUrl": "https://your-site.com/return"
   },
@@ -18,7 +22,7 @@
     }
   },
   "/payments/{paymentPspReference}/cancel": {
-    "paymentPspReference": "{paymentPspReference}"
+    "reference": "Your Modification Merchant Reference"
   },
   "/orders": {
     "amount": { "currency": "USD", "value": 2000 },
